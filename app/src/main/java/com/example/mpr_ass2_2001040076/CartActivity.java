@@ -13,13 +13,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import com.example.mpr_ass2_2001040076.adapters.CartItemAdapter;
+import com.example.mpr_ass2_2001040076.adapters.CartAdapter;
 import com.example.mpr_ass2_2001040076.db.EntitiesManager;
 import com.example.mpr_ass2_2001040076.models.CartItem;
 import com.example.mpr_ass2_2001040076.models.Product;
 
 public class CartActivity extends AppCompatActivity {
-    private CartItemAdapter adapter;
+    private CartAdapter adapter;
     private RecyclerView rwProducts;
 
     @Override
@@ -37,7 +37,7 @@ public class CartActivity extends AppCompatActivity {
         // set layout
         rwProducts.setLayoutManager(new LinearLayoutManager(CartActivity.this));
         // init adapter
-        adapter = new CartItemAdapter(cartItems, products, footerTotalPriceTextView);
+        adapter = new CartAdapter(cartItems, products, footerTotalPriceTextView);
         // bind RecycleView with adapter
         rwProducts.setAdapter(adapter);
 

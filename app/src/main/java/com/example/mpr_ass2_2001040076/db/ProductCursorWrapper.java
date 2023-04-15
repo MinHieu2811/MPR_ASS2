@@ -15,10 +15,10 @@ public class ProductCursorWrapper extends CursorWrapper {
     }
 
     public Product getProduct() {
-        int idIndex = getColumnIndex(DbSchema.ProductTable.Cols.ID);
-        int thumbnailIndex = getColumnIndex(DbSchema.ProductTable.Cols.THUMBNAIL);
-        int nameIndex = getColumnIndex(DbSchema.ProductTable.Cols.NAME);
-        int priceIndex = getColumnIndex(DbSchema.ProductTable.Cols.PRICE);
+        int idIndex = getColumnIndex(DbSchema.ProductTable.Cols.PRODUCT_ID);
+        int thumbnailIndex = getColumnIndex(DbSchema.ProductTable.Cols.PRODUCT_THUMBNAIL);
+        int nameIndex = getColumnIndex(DbSchema.ProductTable.Cols.PRODUCT_NAME);
+        int priceIndex = getColumnIndex(DbSchema.ProductTable.Cols.PRODUCT_PRICE);
 
         int id = getInt(idIndex);
         String thumbnail = getString(thumbnailIndex);

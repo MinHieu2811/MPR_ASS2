@@ -1,5 +1,6 @@
 package com.example.mpr_ass2_2001040076.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +21,7 @@ import com.example.mpr_ass2_2001040076.db.EntitiesManager;
 import com.example.mpr_ass2_2001040076.models.CartItem;
 import com.example.mpr_ass2_2001040076.models.Product;
 
-public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ProductHolder> {
+public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ProductHolder> {
     // ViewHolder
     protected class ProductHolder extends RecyclerView.ViewHolder {
         public ProductHolder(@NonNull View itemView) {
@@ -28,101 +29,113 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.Produc
         }
 
         public void bind(CartItem cartItem) {
-            // get ref of corresponding product
-            Product product = Product.findByCartItem(cartItem, products);
 
-            //get ref to widgets
-            ImageView imageView = itemView.findViewById(R.id.imageView);
-            TextView nameView = itemView.findViewById(R.id.name2);
-            TextView priceView = itemView.findViewById(R.id.single_price);
-            ImageButton upBtn = itemView.findViewById(R.id.upBtn);
-            ImageButton downBtn = itemView.findViewById(R.id.downBtn);
+            Product productInCart = Product.findByCartItem(cartItem, productList);
+            ImageView image = itemView.findViewById(R.id.imageView);
+
+            ImageDownloader imageDownload = new ImageDownloader(image);
+            imageDownload.execute(productInCart.getThumbnail());
+
             TextView totalPrice = itemView.findViewById(R.id.total_price);
             TextView quantity = itemView.findViewById(R.id.quantity);
 
-            // set data
-            ImageDownloader imageDownloader = new ImageDownloader(imageView);
-            imageDownloader.execute(product.getThumbnail());
+            TextView name = itemView.findViewById(R.id.name2);
+            ImageButton downBtn = itemView.findViewById(R.id.downBtn);
 
-            nameView.setText(product.getTrimName());
-            priceView.setText(product.getFormattedUnitPrice());
+            TextView price = itemView.findViewById(R.id.single_price);
+            ImageButton upBtn = itemView.findViewById(R.id.upBtn);
 
-            int sum = singleProductSum(product);
+            name.setText(productInCart.getTrimName());
+            price.setText(productInCart.getFormattedUnitPrice());
+
+            int sum = singleProductSum(productInCart);
 
             totalPrice.setText("đ " + sum);
             quantity.setText(cartItem.getQuantity() + "");
 
             // handle events
             EntitiesManager entitiesManager = EntitiesManager.getInstance(itemView.getContext());
-            Product finalProduct = product;
+            Product finalProduct = productInCart;
             upBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // handle cartItem
                     cartItem.setQuantity(cartItem.getQuantity() + 1);
                     entitiesManager.getCartManager().update(cartItem);
 
-                    //handle footer total price
                     cartTotalPrice += finalProduct.getUnitPrice();
                     updateFooterUI();
-                    CartItemAdapter.this.notifyDataSetChanged();
+                    CartAdapter.this.notifyDataSetChanged();
                 }
             });
 
             downBtn.setOnClickListener(new View.OnClickListener() {
+                @SuppressLint("NotifyDataSetChanged")
                 @Override
                 public void onClick(View v) {
                     int quantity = cartItem.getQuantity();
                     if (quantity > 0) {
-                        // handle cartItem
                         cartItem.setQuantity(quantity - 1);
                         entitiesManager.getCartManager().update(cartItem);
                         if (cartItem.getQuantity() == 0) {
                             entitiesManager.getCartManager().delete(cartItem.getId());
                             cartItems.remove(cartItem);
-                            Toast.makeText(itemView.getContext(), "Removed "+product.getTrimName(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(itemView.getContext(), "Removed "+productInCart.getTrimName(), Toast.LENGTH_SHORT).show();
                         }
 
-                        //handle footer total price
                         cartTotalPrice -= finalProduct.getUnitPrice();
                         updateFooterUI();
-                        CartItemAdapter.this.notifyDataSetChanged();
+                        CartAdapter.this.notifyDataSetChanged();
                     }
                 }
             });
         }
     }
 
-    // dataset
-    private final List<Product> products;
+    private final List<Product> productList;
     private final List<CartItem> cartItems;
-    // derived attribute
     private int cartTotalPrice;
-    // for Dependency Injection
     private TextView cartTotalPriceTextView;
 
     private int singleProductSum(Product product) {
         return product.getUnitPrice() * CartItem.findByProductId(product.getId(), cartItems).getQuantity();
     }
 
-    private int calculate_cartTotalPrice() {
-        int sum = 0;
-        for (CartItem cartItem : cartItems) {
-            sum += Product.findByCartItem(cartItem, products).getUnitPrice() * cartItem.getQuantity();
-        }
-        return sum;
+    @Override
+    public void onBindViewHolder(@NonNull ProductHolder holder, int position) {
+        CartItem cart = cartItems.get(position);
+        holder.bind(cart);
+    }
+
+
+    @NonNull
+    @Override
+    public ProductHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Context context = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View itemView = inflater.inflate(R.layout.item_cart, parent, false);
+
+        return new ProductHolder(itemView);
     }
 
     private void updateFooterUI() {
         cartTotalPriceTextView.setText("đ " + cartTotalPrice);
     }
 
-    public CartItemAdapter(List<CartItem> cartItems, List<Product> products, TextView cartTotalPriceTextView) {
+    public CartAdapter(List<CartItem> cartItems, List<Product> products, TextView cartTotalPriceTextView) {
         this.cartItems = cartItems;
-        this.products = products;
+        this.productList = products;
         this.cartTotalPriceTextView = cartTotalPriceTextView;
         cartTotalPrice = calculate_cartTotalPrice();
         updateFooterUI();
+    }
+
+
+    private int calculate_cartTotalPrice() {
+        int sum = 0;
+        for (CartItem cartItem : cartItems) {
+            sum += Product.findByCartItem(cartItem, productList).getUnitPrice() * cartItem.getQuantity();
+        }
+        return sum;
     }
 
     @Override
@@ -130,27 +143,4 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.Produc
         return cartItems.size();
     }
 
-    @NonNull
-    @Override
-    public ProductHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        //context
-        Context context = parent.getContext();
-
-        //layout inflater
-        LayoutInflater inflater = LayoutInflater.from(context);
-
-        // inflate - view
-        View itemView = inflater.inflate(R.layout.item_cart, parent, false);
-
-        return new ProductHolder(itemView);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull ProductHolder holder, int position) {
-        // get data item at pos
-        CartItem cartItem = cartItems.get(position);
-
-        // bind data to the view
-        holder.bind(cartItem);
-    }
 }

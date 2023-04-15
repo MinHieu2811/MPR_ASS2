@@ -9,8 +9,8 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "a2_2001040076.db";
     public static final int DB_VERSION = 1;
 
-    public DbHelper(Context context) {
-        super(context, DB_NAME, null, DB_VERSION);
+    public DbHelper(Context contextDb) {
+        super(contextDb, DB_NAME, null, DB_VERSION);
     }
 
     @Override
@@ -18,15 +18,15 @@ public class DbHelper extends SQLiteOpenHelper {
         Log.i("db", "current db version: " + db.getVersion());
         // create tables
         db.execSQL("CREATE TABLE " + DbSchema.ProductTable.NAME + " (" +
-                DbSchema.ProductTable.Cols.ID + " INTEGER PRIMARY KEY, " +
-                DbSchema.ProductTable.Cols.THUMBNAIL + " TEXT NOT NULL, " +
-                DbSchema.ProductTable.Cols.NAME + " TEXT NOT NULL, " +
-                DbSchema.ProductTable.Cols.PRICE + " INTEGER NOT NULL)");
+                DbSchema.ProductTable.Cols.PRODUCT_ID + " INTEGER PRIMARY KEY, " +
+                DbSchema.ProductTable.Cols.PRODUCT_PRICE + " INTEGER NOT NULL," +
+                DbSchema.ProductTable.Cols.PRODUCT_THUMBNAIL + " TEXT NOT NULL, " +
+                DbSchema.ProductTable.Cols.PRODUCT_NAME + " TEXT NOT NULL)");
 
         db.execSQL("CREATE TABLE " + DbSchema.CartItemTable.NAME + " (" +
-                DbSchema.CartItemTable.Cols.ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                DbSchema.CartItemTable.Cols.PRODUCT_ID + " INTEGER NOT NULL, " +
-                DbSchema.CartItemTable.Cols.QUANTITY + " INTEGER NOT NULL)");
+                DbSchema.CartItemTable.Cols.CART_PRODUCT_ID + " INTEGER NOT NULL, " +
+                DbSchema.CartItemTable.Cols.CART_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                DbSchema.CartItemTable.Cols.CART_QUANTITY + " INTEGER NOT NULL)");
 
         System.out.println("DB CONNECTED");
     }

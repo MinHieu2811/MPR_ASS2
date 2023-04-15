@@ -9,25 +9,24 @@ import java.util.List;
 import com.example.mpr_ass2_2001040076.models.CartItem;
 
 public class CartItemCursorWrapper extends CursorWrapper {
-    public CartItemCursorWrapper(Cursor cursor) {
-        super(cursor);
+    public CartItemCursorWrapper(Cursor cursorAnd) {
+        super(cursorAnd);
     }
 
     public CartItem getCart() {
-        int idIndex = getColumnIndex(DbSchema.CartItemTable.Cols.ID);
-        int productIdIndex = getColumnIndex(DbSchema.CartItemTable.Cols.PRODUCT_ID);
-        int quantityIndex = getColumnIndex(DbSchema.CartItemTable.Cols.QUANTITY);
+        int quantityIdx = getColumnIndex(DbSchema.CartItemTable.Cols.QUANTITY);
+        int productIdIdx = getColumnIndex(DbSchema.CartItemTable.Cols.PRODUCT_ID);
+        int idIdx = getColumnIndex(DbSchema.CartItemTable.Cols.ID);
 
-
-        int id = getInt(idIndex);
-        int productId = getInt(productIdIndex);
-        int quantity = getInt(quantityIndex);
+        int id = getInt(idIdx);
+        int productId = getInt(productIdIdx);
+        int quantity = getInt(quantityIdx);
 
         CartItem cartItem = new CartItem(id, productId,quantity);
         return cartItem;
     }
 
-    public List<CartItem> getCarts() {
+    public List<CartItem> getCartList() {
         List<CartItem> cartItems = new ArrayList<>();
         moveToFirst();
         while (!isAfterLast()) {

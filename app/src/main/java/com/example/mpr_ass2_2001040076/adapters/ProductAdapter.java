@@ -21,51 +21,48 @@ import com.example.mpr_ass2_2001040076.models.CartItem;
 import com.example.mpr_ass2_2001040076.models.Product;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductHolder> {
-    // ViewHolder
     protected class ProductHolder extends RecyclerView.ViewHolder {
         public ProductHolder(@NonNull View itemView) {
             super(itemView);
         }
 
         public void bind(Product product) {
-            //get ref to widgets
-            TextView nameView = itemView.findViewById(R.id.name);
+            TextView price = itemView.findViewById(R.id.price);
 
-            ImageView imageView = itemView.findViewById(R.id.image);
+            ImageButton imageBtn = itemView.findViewById(R.id.imageButtonItem);
 
-            TextView priceView = itemView.findViewById(R.id.price);
+            TextView name = itemView.findViewById(R.id.name);
 
-            ImageButton imageButton = itemView.findViewById(R.id.imageButtonItem);
+            ImageView image = itemView.findViewById(R.id.image);
 
-            // set data
-            nameView.setText(product.getTrimName());
+            name.setText(product.getTrimName());
 
-            ImageDownloader imageDownloader = new ImageDownloader(imageView);
+            ImageDownloader imageDownloader = new ImageDownloader(image);
             imageDownloader.execute(product.getThumbnail());
 
-            priceView.setText(product.getFormattedUnitPrice());
+            price.setText(product.getFormattedUnitPrice());
 
             // handle events
-            EntitiesManager entitiesManager = EntitiesManager.getInstance(itemView.getContext());
-            imageButton.setOnClickListener(new View.OnClickListener() {
+            EntitiesManager entities = EntitiesManager.getInstance(itemView.getContext());
+            imageBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    List<CartItem> cartItems = entitiesManager.getCartManager().all();
-                    CartItem cartItem = CartItem.findByProductId(product.getId(), cartItems);
-                    if (cartItem != null) {
-                        cartItem.setQuantity(cartItem.getQuantity() + 1);
-                        entitiesManager.getCartManager().update(cartItem);
+                    List<CartItem> cartItemList = entities.getCartManager().all();
+                    CartItem cartItemDetail = CartItem.findByProductId(product.getId(), cartItemList);
+                    if (cartItemDetail != null) {
+                        cartItemDetail.setQuantity(cartItemDetail.getQuantity() + 1);
+                        entities.getCartManager().update(cartItemDetail);
                     } else {
-                        entitiesManager.getCartManager().add(new CartItem(product.getId(),1));
+                        entities.getCartManager().add(new CartItem(product.getId(),1));
                     }
 
-                    Toast.makeText(itemView.getContext(), "added "+product.getTrimName(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(itemView.getContext(), "Added "+ product.getTrimName() + " successfully!", Toast.LENGTH_SHORT).show();
 
-                    imageButton.animate().scaleX(1.25f).scaleY(1.25f).setDuration(1000).withEndAction(
+                    imageBtn.animate().scaleX(1.25f).scaleY(1.25f).setDuration(1000).withEndAction(
                             new Runnable() {
                                 @Override
                                 public void run() {
-                                    imageButton.animate().scaleX(1f).scaleY(1f);
+                                    imageBtn.animate().scaleX(1f).scaleY(1f);
                                 }
                             }
                     );
@@ -73,40 +70,35 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
             });
         }
     }
-
-    // dataset
-    private final List<Product> products;
+    private final List<Product> productList;
 
     public ProductAdapter(List<Product> products) {
-        this.products = products;
+        this.productList = products;
     }
 
+
     @Override
-    public int getItemCount() {
-        return products.size();
+    public void onBindViewHolder(@NonNull ProductHolder holder, int position) {
+        Product productDetail = productList.get(position);
+
+        holder.bind(productDetail);
     }
+
 
     @NonNull
     @Override
     public ProductHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        //context
-        Context context = parent.getContext();
+        Context contextLayer = parent.getContext();
 
-        //layout inflater
-        LayoutInflater inflater = LayoutInflater.from(context);
+        LayoutInflater layoutInflater = LayoutInflater.from(contextLayer);
 
-        // inflate - view
-        View itemView = inflater.inflate(R.layout.item_product, parent, false);
+        View itemView = layoutInflater.inflate(R.layout.item_product, parent, false);
 
         return new ProductHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ProductHolder holder, int position) {
-        // get data item at pos
-        Product product = products.get(position);
-
-        // bind data to the view
-        holder.bind(product);
+    public int getItemCount() {
+        return productList.size();
     }
 }

@@ -68,17 +68,17 @@ public class EntitiesManager {
 
     public final class ProductManager {
         private static final String INSERT_STMT = "INSERT INTO " + DbSchema.ProductTable.NAME + " ("
-                + DbSchema.ProductTable.Cols.ID + ", "
-                + DbSchema.ProductTable.Cols.THUMBNAIL + ", "
-                + DbSchema.ProductTable.Cols.NAME + ", "
-                + DbSchema.ProductTable.Cols.PRICE
+                + DbSchema.ProductTable.Cols.PRODUCT_ID + ", "
+                + DbSchema.ProductTable.Cols.PRODUCT_THUMBNAIL + ", "
+                + DbSchema.ProductTable.Cols.PRODUCT_NAME + ", "
+                + DbSchema.ProductTable.Cols.PRODUCT_PRICE
                 + ") VALUES (?, ?, ?, ?)";
 
         private static final String UPDATE_STMT = "UPDATE " + DbSchema.ProductTable.NAME + " SET "
-                + DbSchema.ProductTable.Cols.THUMBNAIL + " = ?, "
-                + DbSchema.ProductTable.Cols.NAME + " = ?, "
-                + DbSchema.ProductTable.Cols.PRICE + " = ? "
-                + "WHERE " + DbSchema.ProductTable.Cols.ID + " = ?";
+                + DbSchema.ProductTable.Cols.PRODUCT_THUMBNAIL + " = ?, "
+                + DbSchema.ProductTable.Cols.PRODUCT_NAME + " = ?, "
+                + DbSchema.ProductTable.Cols.PRODUCT_PRICE + " = ? "
+                + "WHERE " + DbSchema.ProductTable.Cols.PRODUCT_ID + " = ?";
 
         private static final String DELETE_ALL = "DELETE FROM " + DbSchema.ProductTable.NAME;
 
@@ -104,7 +104,7 @@ public class EntitiesManager {
         }
 
         public boolean delete(long id) {
-            int result = db.delete(DbSchema.ProductTable.NAME, DbSchema.ProductTable.Cols.ID + " = ?", new String[]{id + ""});
+            int result = db.delete(DbSchema.ProductTable.NAME, DbSchema.ProductTable.Cols.PRODUCT_ID + " = ?", new String[]{id + ""});
             return result > 0;
         }
 
@@ -126,14 +126,14 @@ public class EntitiesManager {
 
     public final class CartManager {
         private static final String INSERT_STMT = "INSERT INTO " + DbSchema.CartItemTable.NAME + " ("
-                + DbSchema.CartItemTable.Cols.PRODUCT_ID + ", "
-                + DbSchema.CartItemTable.Cols.QUANTITY
+                + DbSchema.CartItemTable.Cols.CART_PRODUCT_ID + ", "
+                + DbSchema.CartItemTable.Cols.CART_QUANTITY
                 + ") VALUES (?, ?)";
 
         private static final String UPDATE_STMT = "UPDATE " + DbSchema.CartItemTable.NAME + " SET "
-                + DbSchema.CartItemTable.Cols.PRODUCT_ID + " = ?, "
-                + DbSchema.CartItemTable.Cols.QUANTITY + " = ? "
-                + "WHERE " + DbSchema.CartItemTable.Cols.ID + " = ?";
+                + DbSchema.CartItemTable.Cols.CART_PRODUCT_ID + " = ?, "
+                + DbSchema.CartItemTable.Cols.CART_QUANTITY + " = ? "
+                + "WHERE " + DbSchema.CartItemTable.Cols.CART_ID + " = ?";
 
         private static final String DELETE_ALL = "DELETE FROM " + DbSchema.CartItemTable.NAME;
 
@@ -144,7 +144,7 @@ public class EntitiesManager {
             String sql = "SELECT * FROM " + DbSchema.CartItemTable.NAME;
             Cursor cursor = db.rawQuery(sql, null);
             CartItemCursorWrapper cartItemCursorWrapper = new CartItemCursorWrapper(cursor);
-            return cartItemCursorWrapper.getCarts();
+            return cartItemCursorWrapper.getCartList();
         }
 
         public boolean add(CartItem cartItem) {
@@ -157,7 +157,7 @@ public class EntitiesManager {
         }
 
         public boolean delete(long id) {
-            int result = db.delete(DbSchema.CartItemTable.NAME, DbSchema.CartItemTable.Cols.ID + "= ?", new String[]{id + ""});
+            int result = db.delete(DbSchema.CartItemTable.NAME, DbSchema.CartItemTable.Cols.CART_PRODUCT_ID + "= ?", new String[]{id + ""});
             return result > 0;
         }
 
