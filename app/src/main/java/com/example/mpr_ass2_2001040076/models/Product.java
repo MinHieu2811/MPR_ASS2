@@ -4,92 +4,94 @@ import java.io.Serializable;
 import java.util.Collection;
 
 public class Product implements Serializable {
-    private int id;
-    private String thumbnail;
-    private String name;
-    private int unitPrice;
+    private int productId;
+    private String productThumbnail;
+    private String productName;
+    private int productUnitPrice;
 
     public Product(int id, String thumbnail, String name, int unitPrice) {
-        this.id = id;
-        this.thumbnail = thumbnail;
-        this.name = name;
-        this.unitPrice = unitPrice;
+        this.productId = id;
+        this.productThumbnail = thumbnail;
+        this.productName = name;
+        this.productUnitPrice = unitPrice;
     }
 
     /**
      * @effects return id
      */
     public int getId() {
-        return id;
+        return productId;
     }
 
     public void setId(int id) {
-        this.id = id;
+        this.productId = id;
     }
 
     /**
      * @effects return thumbnail
      */
     public String getThumbnail() {
-        return thumbnail;
+        return productThumbnail;
     }
 
     public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
+        this.productThumbnail = thumbnail;
     }
 
     /**
      * @effects return name
      */
     public String getName() {
-        return name;
+        return productName;
     }
 
-    /**
-     * @effects return name of the product that trimmed up to 41 characters
-     */
-    public String getTrimName() {
-        if (name.length() > 38) {
-            return name.substring(0, 38) + "...";
-        } else {
-            return name;
-        }
-    }
+
 
     public void setName(String name) {
-        this.name = name;
+        this.productName = name;
     }
 
     /**
      * @effects return unitPrice
      */
     public int getUnitPrice() {
-        return unitPrice;
+        return productUnitPrice;
     }
 
     /**
      * @effects return Formatted unitPrice in VND
      */
     public String getFormattedUnitPrice() {
-        return "đ " + unitPrice;
+        return "đ " + productUnitPrice;
     }
 
     public void setUnitPrice(int unitPrice) {
-        this.unitPrice = unitPrice;
+        this.productUnitPrice = unitPrice;
     }
 
     @Override
     public String toString() {
         return "Product{" +
-                "id=" + id +
-                ", thumbnail='" + thumbnail + '\'' +
-                ", name='" + name + '\'' +
-                ", unitPrice=" + unitPrice +
+                "id=" + productId +
+                ", thumbnail='" + productThumbnail + '\'' +
+                ", name='" + productName + '\'' +
+                ", unitPrice=" + productUnitPrice +
                 '}';
     }
 
-    public static Product findByCartItem(CartItem cartItem, Collection<Product> products) {
-        for (Product product : products) {
+    /**
+     * @effects return name of the product that trimmed up to 41 characters
+     */
+    public String getTrimName() {
+        if (productName.length() > 38) {
+            return productName.substring(0, 38) + "...";
+        } else {
+            return productName;
+        }
+    }
+
+    public static Product findByCartItem(CartItem cartItem, Collection<Product> productList) {
+        for (Product product : productList) {
             if (cartItem.getProductId() == product.getId()) {
                 return product;
             }

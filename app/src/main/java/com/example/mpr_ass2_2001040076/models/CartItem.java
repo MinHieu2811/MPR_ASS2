@@ -4,66 +4,66 @@ package com.example.mpr_ass2_2001040076.models;
 import java.util.Collection;
 
 public class CartItem {
-    private int id;
-    private int productId;
-    private int quantity;
+    private int cartItemId;
+    private int cartProductId;
+    private int cartQuantity;
 
     public CartItem(int id, int productId, int quantity) {
-        this.id = id;
-        this.productId = productId;
-        this.quantity = quantity;
+        this.cartItemId = id;
+        this.cartProductId = productId;
+        this.cartQuantity = quantity;
     }
 
     public CartItem(int productId, int quantity) {
-        this.productId = productId;
-        this.quantity = quantity;
+        this.cartItemId = productId;
+        this.cartQuantity = quantity;
     }
 
     /**
      * @effects return id
      */
     public int getId() {
-        return id;
+        return cartItemId;
     }
 
     public void setId(int id) {
-        this.id = id;
+        this.cartItemId = id;
     }
 
     /**
      * @effects return productId
      */
     public int getProductId() {
-        return productId;
+        return cartProductId;
     }
 
     public void setProductId(int productId) {
-        this.productId = productId;
+        this.cartProductId = productId;
     }
 
     /**
      * @effects return quantity
      */
     public int getQuantity() {
-        return quantity;
+        return cartQuantity;
     }
 
     public void setQuantity(int quantity) {
-        this.quantity = quantity;
+        this.cartQuantity = quantity;
     }
 
     @Override
     public String toString() {
         return "CartItem{" +
-                "id=" + id +
-                ", productId=" + productId +
-                ", quantity=" + quantity +
+                "id=" + cartItemId +
+                ", quantity=" + cartQuantity +
+                ", productId=" + cartProductId +
                 '}';
     }
 
-    public static CartItem findByProductId(int productId, Collection<CartItem> cartItems) {
-        for (CartItem cartItem : cartItems) {
-            if (cartItem.productId == productId) {
+    public static CartItem searchByProductId(int productId, Collection<CartItem> cartItemList) {
+        for (CartItem cartItem : cartItemList) {
+            if (cartItem.cartProductId == productId) {
                 return cartItem;
             }
         }

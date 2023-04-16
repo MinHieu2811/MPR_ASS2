@@ -17,7 +17,7 @@ import java.util.List;
 
 import com.example.mpr_ass2_2001040076.ImageDownloader;
 import com.example.mpr_ass2_2001040076.R;
-import com.example.mpr_ass2_2001040076.db.EntitiesManager;
+import com.example.mpr_ass2_2001040076.db.Entities;
 import com.example.mpr_ass2_2001040076.models.CartItem;
 import com.example.mpr_ass2_2001040076.models.Product;
 
@@ -54,13 +54,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ProductHolder>
             quantity.setText(cartItem.getQuantity() + "");
 
             // handle events
-            EntitiesManager entitiesManager = EntitiesManager.getInstance(itemView.getContext());
+            Entities entitiesManager = Entities.getInstance(itemView.getContext());
             Product finalProduct = productInCart;
             upBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     cartItem.setQuantity(cartItem.getQuantity() + 1);
-                    entitiesManager.getCartManager().update(cartItem);
+                    entitiesManager.onGetCartManager().update(cartItem);
 
                     cartTotalPrice += finalProduct.getUnitPrice();
                     updateFooterUI();
@@ -75,9 +75,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ProductHolder>
                     int quantity = cartItem.getQuantity();
                     if (quantity > 0) {
                         cartItem.setQuantity(quantity - 1);
-                        entitiesManager.getCartManager().update(cartItem);
+                        entitiesManager.onGetCartManager().update(cartItem);
                         if (cartItem.getQuantity() == 0) {
-                            entitiesManager.getCartManager().delete(cartItem.getId());
+                            entitiesManager.onGetCartManager().delete(cartItem.getId());
                             cartItems.remove(cartItem);
                             Toast.makeText(itemView.getContext(), "Removed "+productInCart.getTrimName(), Toast.LENGTH_SHORT).show();
                         }
@@ -96,9 +96,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ProductHolder>
     private int cartTotalPrice;
     private TextView cartTotalPriceTextView;
 
-    private int singleProductSum(Product product) {
-        return product.getUnitPrice() * CartItem.findByProductId(product.getId(), cartItems).getQuantity();
-    }
 
     @Override
     public void onBindViewHolder(@NonNull ProductHolder holder, int position) {
@@ -129,6 +126,16 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ProductHolder>
         updateFooterUI();
     }
 
+    @Override
+    public int getItemCount() {
+        return cartItems.size();
+    }
+
+
+    private int singleProductSum(Product product) {
+        return product.getUnitPrice() * CartItem.searchByProductId(product.getId(), cartItems).getQuantity();
+    }
+
 
     private int calculate_cartTotalPrice() {
         int sum = 0;
@@ -137,10 +144,4 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ProductHolder>
         }
         return sum;
     }
-
-    @Override
-    public int getItemCount() {
-        return cartItems.size();
-    }
-
 }

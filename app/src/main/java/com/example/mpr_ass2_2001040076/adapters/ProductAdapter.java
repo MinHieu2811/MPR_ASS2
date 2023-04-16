@@ -16,7 +16,7 @@ import java.util.List;
 
 import com.example.mpr_ass2_2001040076.ImageDownloader;
 import com.example.mpr_ass2_2001040076.R;
-import com.example.mpr_ass2_2001040076.db.EntitiesManager;
+import com.example.mpr_ass2_2001040076.db.Entities;
 import com.example.mpr_ass2_2001040076.models.CartItem;
 import com.example.mpr_ass2_2001040076.models.Product;
 
@@ -43,17 +43,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
             price.setText(product.getFormattedUnitPrice());
 
             // handle events
-            EntitiesManager entities = EntitiesManager.getInstance(itemView.getContext());
+            Entities entities = Entities.getInstance(itemView.getContext());
             imageBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    List<CartItem> cartItemList = entities.getCartManager().all();
-                    CartItem cartItemDetail = CartItem.findByProductId(product.getId(), cartItemList);
+                    List<CartItem> cartItemList = entities.onGetCartManager().all();
+                    CartItem cartItemDetail = CartItem.searchByProductId(product.getId(), cartItemList);
                     if (cartItemDetail != null) {
                         cartItemDetail.setQuantity(cartItemDetail.getQuantity() + 1);
-                        entities.getCartManager().update(cartItemDetail);
+                        entities.onGetCartManager().update(cartItemDetail);
                     } else {
-                        entities.getCartManager().add(new CartItem(product.getId(),1));
+                        entities.onGetCartManager().add(new CartItem(product.getId(),1));
                     }
 
                     Toast.makeText(itemView.getContext(), "Added "+ product.getTrimName() + " successfully!", Toast.LENGTH_SHORT).show();

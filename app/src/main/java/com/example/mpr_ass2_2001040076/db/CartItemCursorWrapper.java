@@ -14,9 +14,9 @@ public class CartItemCursorWrapper extends CursorWrapper {
     }
 
     public CartItem getCart() {
-        int quantityIdx = getColumnIndex(DbSchema.CartItemTable.Cols.QUANTITY);
-        int productIdIdx = getColumnIndex(DbSchema.CartItemTable.Cols.PRODUCT_ID);
-        int idIdx = getColumnIndex(DbSchema.CartItemTable.Cols.ID);
+        int quantityIdx = getColumnIndex(DbSchema.CartItemTable.Cols.CART_QUANTITY);
+        int productIdIdx = getColumnIndex(DbSchema.CartItemTable.Cols.CART_PRODUCT_ID);
+        int idIdx = getColumnIndex(DbSchema.CartItemTable.Cols.CART_ID);
 
         int id = getInt(idIdx);
         int productId = getInt(productIdIdx);

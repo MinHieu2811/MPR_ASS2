@@ -32,39 +32,39 @@ import java.util.List;
 import java.util.Scanner;
 
 import com.example.mpr_ass2_2001040076.adapters.ProductAdapter;
-import com.example.mpr_ass2_2001040076.db.EntitiesManager;
+import com.example.mpr_ass2_2001040076.db.Entities;
 import com.example.mpr_ass2_2001040076.models.Product;
 
 public class MainActivity extends AppCompatActivity {
-    public static final int PRODUCT_ADDED = 1;
+    public static final int PRODUCT_ADD = 1;
 
     private final Handler handler = HandlerCompat.createAsync(Looper.getMainLooper());
-    private EntitiesManager entitiesManager;
+    private Entities entities;
 
     private ProductAdapter adapter;
-    private RecyclerView rwProducts;
+    private RecyclerView productsView;
 
     // init dataset
-    private List<Product> products = new ArrayList<>();
-    private List<Product> dbProducts;
+    private List<Product> productList = new ArrayList<>();
+    private List<Product> databaseProducts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Constants.executor.execute(new Runnable() {
+        Constants.executorService.execute(new Runnable() {
             @Override
             public void run() {
-                String json = LoadJSON(Constants.APILink);
+                String json = LoadJSON(Constants.APILINK);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
                         if (json == null) {
-                            Toast.makeText(MainActivity.this, "Oops, failed to connect!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "Failed to connect!", Toast.LENGTH_SHORT).show();
                         } else {
                             try {
-                                Toast.makeText(MainActivity.this, "Loading Items...", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, "Loading items...", Toast.LENGTH_SHORT).show();
                                 JSONArray root = new JSONArray(json);
                                 for (int i = 0; i < root.length(); i++) {
                                     JSONObject jsonObject = (JSONObject) root.get(i);
@@ -73,30 +73,30 @@ public class MainActivity extends AppCompatActivity {
                                     String name = jsonObject.getString("name");
                                     int unitPrice = jsonObject.getInt("unitPrice");
                                     Product product = new Product(id, thumbnail, name, unitPrice);
-                                    products.add(product);
+                                    productList.add(product);
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
 
-                        entitiesManager = EntitiesManager.getInstance(MainActivity.this);
-                        entitiesManager.checkVersion();
-                        dbProducts = entitiesManager.getProductManager().all();
+                        entities = Entities.getInstance(MainActivity.this);
+                        entities.checkVersion();
+                        databaseProducts = entities.onGetProductManager().all();
                         if (!areProductsUpToDate()) {
-                            rebuildDb();
-                            dbProducts = entitiesManager.getProductManager().all();
+                            rebuildDatabase();
+                            databaseProducts = entities.onGetProductManager().all();
                         }
-                        products.clear();
-                        products.addAll(dbProducts);
-                        rwProducts = findViewById(R.id.rwProducts);
+                        productList.clear();
+                        productList.addAll(databaseProducts);
+                        productsView = findViewById(R.id.rwProducts);
                         // set layout
                         GridLayoutManager gridLayoutManager = new GridLayoutManager(MainActivity.this, 2);
-                        rwProducts.setLayoutManager(gridLayoutManager);
+                        productsView.setLayoutManager(gridLayoutManager);
                         // init adapter
-                        adapter = new ProductAdapter(products);
+                        adapter = new ProductAdapter(productList);
                         // bind RecycleView with adapter
-                        rwProducts.setAdapter(adapter);
+                        productsView.setAdapter(adapter);
                     }
                 });
             }
@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                search(searchbarTextView.getText().toString());
+                onSearch(searchbarTextView.getText().toString());
             }
         });
 
@@ -116,32 +116,43 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, CartActivity.class);
-                intent.putExtra("products", (Serializable) products);
+                intent.putExtra("products", (Serializable) productList);
                 Bundle extras = intent.getExtras();
                 List<Product> list = (List<Product>) extras.get("products");
-                Log.i("KKKtuan", "ket qua: "+(list==products));
+                Log.i("KKKtuan", "ket qua: "+(list==productList));
                 startActivity(intent);
             }
         });
     }
 
-    /**
-     * @Requires products!=null /\ dbProducts!=null
-     * @effects <pre>
-     *  for every item in products
-     *      if it is different than the one in same index of dbProducts
-     *          return false
-     *      else
-     *          return true
-     * </pre>
-     */
+
+
+    private boolean rebuildDatabase() {
+        entities.onGetProductManager().clear();
+        entities.onGetCartManager().clear();
+        for (Product product : productList) {
+            boolean result = entities.onGetProductManager().add(product);
+            if (!result) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private void reloadProductFromDb() {
+        productList.clear();
+        productList.addAll(entities.onGetProductManager().all());
+        adapter.notifyDataSetChanged();
+    }
+
     private boolean areProductsUpToDate() {
-        if (products.size() != dbProducts.size()) {
+        if (productList.size() != databaseProducts.size()) {
             return false;
         }
-        for (int i = 0; i < products.size(); i++) {
-            Product p1 = products.get(i);
-            Product p2 = dbProducts.get(i);
+        for (int i = 0; i < productList.size(); i++) {
+            Product p1 = productList.get(i);
+            Product p2 = databaseProducts.get(i);
             if (p1.getId() != p2.getId()) {
                 return false;
             }
@@ -149,17 +160,18 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean rebuildDb() {
-        entitiesManager.getProductManager().clear();
-        entitiesManager.getCartManager().clear();
-        for (Product product : products) {
-            boolean result = entitiesManager.getProductManager().add(product);
-            if (!result) {
-                return false;
-            }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK && requestCode == PRODUCT_ADD) {
+            productList.clear();
+            productList.addAll(entities.onGetProductManager().all());
+            adapter.notifyDataSetChanged();
         }
-        return true;
     }
+
+
 
     private String LoadJSON(String link) {
         URL url;
@@ -196,13 +208,13 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-    private void search(String content) {
+    private void onSearch(String content) {
         if (content.equals("")) {
             Toast.makeText(MainActivity.this, "Please type something...", Toast.LENGTH_SHORT).show();
         } else {
             reloadProductFromDb();
             // filter items
-            Iterator<Product> i = products.iterator();
+            Iterator<Product> i = productList.iterator();
             while (i.hasNext()) {
                 Product product = (Product) i.next();
                 if (!product.getName().toLowerCase().contains(content.toLowerCase())) {
@@ -210,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             adapter.notifyDataSetChanged();
-            rwProducts.setAdapter(adapter);
+            productsView.setAdapter(adapter);
 
             // handle HomeBtn (for going back after searching)
             ImageButton homeBtn = findViewById(R.id.HomeBtn);
@@ -219,27 +231,11 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     reloadProductFromDb();
-                    rwProducts.setAdapter(adapter);
+                    productsView.setAdapter(adapter);
                     homeBtn.setVisibility(View.GONE);
                 }
             });
         }
     }
 
-    private void reloadProductFromDb() {
-        products.clear();
-        products.addAll(entitiesManager.getProductManager().all());
-        adapter.notifyDataSetChanged();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_OK && requestCode == PRODUCT_ADDED) {
-            products.clear();
-            products.addAll(entitiesManager.getProductManager().all());
-            adapter.notifyDataSetChanged();
-        }
-    }
 }

@@ -1,6 +1,7 @@
 package com.example.mpr_ass2_2001040076;
 
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -13,18 +14,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
+//    @SuppressLint("StaticFieldLeak")
     private final ImageView imageView;
 
     public ImageDownloader(ImageView imageView) {
         this.imageView = imageView;
-    }
-
-    @Override
-    protected Bitmap doInBackground(String... strings) {
-        for (String link : strings) {
-            return downloadImage(link);
-        }
-        return null;
     }
 
     // Interacts with UI
@@ -32,32 +26,42 @@ public class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
     protected void onPostExecute(Bitmap bitmap) {
         super.onPostExecute(bitmap);
         if (bitmap == null) {
-            Toast.makeText(imageView.getContext(), "Oops, failed to connect!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(imageView.getContext(), "Failed to connect!", Toast.LENGTH_SHORT).show();
         } else {
             imageView.setImageBitmap(bitmap);
         }
     }
 
-    private Bitmap downloadImage(String link) {
-        URL url;
-        HttpURLConnection connection = null;
-        InputStream is = null;
+    @Override
+    protected Bitmap doInBackground(String... strings) {
+        for (String link : strings) {
+            return onDownloadImage(link);
+        }
+        return null;
+    }
+
+
+
+    private Bitmap onDownloadImage(String link) {
+        URL imageUrl;
+        HttpURLConnection httpConnection = null;
+        InputStream inputStream = null;
         try {
-            url = new URL(link);
-            connection = (HttpURLConnection) url.openConnection();
-            is = connection.getInputStream();
-            Bitmap bitmap = BitmapFactory.decodeStream(is);
+            imageUrl = new URL(link);
+            httpConnection = (HttpURLConnection) imageUrl.openConnection();
+            inputStream = httpConnection.getInputStream();
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
             return bitmap;
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             // close resources
-            if (connection != null) {
-                connection.disconnect();
+            if (httpConnection != null) {
+                httpConnection.disconnect();
             }
-            if (is != null) {
+            if (inputStream != null) {
                 try {
-                    is.close();
+                    inputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

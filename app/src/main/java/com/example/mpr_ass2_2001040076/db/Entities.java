@@ -11,58 +11,58 @@ import java.util.List;
 import com.example.mpr_ass2_2001040076.models.CartItem;
 import com.example.mpr_ass2_2001040076.models.Product;
 
-public class EntitiesManager {
-    private static EntitiesManager instance;
-    private DbHelper dbHelper;
-    private SQLiteDatabase db;
+public class Entities {
+    private static Entities instance;
+    private DbHelper databaseHelper;
+    private SQLiteDatabase database;
 
     private final ProductManager productManager = new ProductManager();
     private final CartManager cartManager = new CartManager();
 
-    private EntitiesManager() {
+    private Entities() {
     }
 
-    private EntitiesManager(Context context) {
-        dbHelper = new DbHelper(context);
-        db = dbHelper.getWritableDatabase();
+    private Entities(Context context) {
+        databaseHelper = new DbHelper(context);
+        database = databaseHelper.getWritableDatabase();
     }
 
-    public static EntitiesManager getInstance(Context context) {
+    public static Entities getInstance(Context context) {
         if (instance == null) {
-            instance = new EntitiesManager(context);
+            instance = new Entities(context);
         }
         return instance;
     }
 
     public void checkVersion() {
-        Log.i("db", "//////db version: " + db.getVersion());
-        if (db.getVersion() < DbHelper.DB_VERSION) {
-            dbHelper.onUpgrade(db, db.getVersion(),  DbHelper.DB_VERSION);
+        Log.i("db", "//////db version: " + database.getVersion());
+        if (database.getVersion() < DbHelper.DB_VERSION) {
+            databaseHelper.onUpgrade(database, database.getVersion(),  DbHelper.DB_VERSION);
         }
     }
 
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        if (db != null) {
-            db.close();
+        if (database != null) {
+            database.close();
         }
-        if (dbHelper != null) {
-            dbHelper.close();
+        if (databaseHelper != null) {
+            databaseHelper.close();
         }
     }
 
     /**
      * @effects return productManager
      */
-    public ProductManager getProductManager() {
+    public ProductManager onGetProductManager() {
         return productManager;
     }
 
     /**
      * @effects return cartManager
      */
-    public CartManager getCartManager() {
+    public CartManager onGetCartManager() {
         return cartManager;
     }
 
@@ -87,13 +87,13 @@ public class EntitiesManager {
 
         public List<Product> all() {
             String sql = "SELECT * FROM " + DbSchema.ProductTable.NAME;
-            Cursor cursor = db.rawQuery(sql, null);
+            Cursor cursor = database.rawQuery(sql, null);
             ProductCursorWrapper productCursorWrapper = new ProductCursorWrapper(cursor);
             return productCursorWrapper.getProducts();
         }
 
         public boolean add(Product product) {
-            SQLiteStatement statement = db.compileStatement(INSERT_STMT);
+            SQLiteStatement statement = database.compileStatement(INSERT_STMT);
             statement.bindString(1, product.getId() + "");
             statement.bindString(2, product.getThumbnail());
             statement.bindString(3, product.getName());
@@ -104,12 +104,12 @@ public class EntitiesManager {
         }
 
         public boolean delete(long id) {
-            int result = db.delete(DbSchema.ProductTable.NAME, DbSchema.ProductTable.Cols.PRODUCT_ID + " = ?", new String[]{id + ""});
+            int result = database.delete(DbSchema.ProductTable.NAME, DbSchema.ProductTable.Cols.PRODUCT_ID + " = ?", new String[]{id + ""});
             return result > 0;
         }
 
         public boolean update(Product product) {
-            SQLiteStatement statement = db.compileStatement(UPDATE_STMT);
+            SQLiteStatement statement = database.compileStatement(UPDATE_STMT);
             statement.bindString(1, product.getThumbnail());
             statement.bindString(2, product.getName());
             statement.bindString(3, product.getUnitPrice() + "");
@@ -120,7 +120,7 @@ public class EntitiesManager {
         }
 
         public void clear() {
-            db.execSQL(DELETE_ALL);
+            database.execSQL(DELETE_ALL);
         }
     }
 
@@ -142,13 +142,13 @@ public class EntitiesManager {
 
         public List<CartItem> all() {
             String sql = "SELECT * FROM " + DbSchema.CartItemTable.NAME;
-            Cursor cursor = db.rawQuery(sql, null);
+            Cursor cursor = database.rawQuery(sql, null);
             CartItemCursorWrapper cartItemCursorWrapper = new CartItemCursorWrapper(cursor);
             return cartItemCursorWrapper.getCartList();
         }
 
         public boolean add(CartItem cartItem) {
-            SQLiteStatement statement = db.compileStatement(INSERT_STMT);
+            SQLiteStatement statement = database.compileStatement(INSERT_STMT);
             statement.bindString(1, cartItem.getProductId() + "");
             statement.bindString(2, cartItem.getQuantity() + "");
 
@@ -157,12 +157,12 @@ public class EntitiesManager {
         }
 
         public boolean delete(long id) {
-            int result = db.delete(DbSchema.CartItemTable.NAME, DbSchema.CartItemTable.Cols.CART_PRODUCT_ID + "= ?", new String[]{id + ""});
+            int result = database.delete(DbSchema.CartItemTable.NAME, DbSchema.CartItemTable.Cols.CART_PRODUCT_ID + "= ?", new String[]{id + ""});
             return result > 0;
         }
 
         public boolean update(CartItem cartItem) {
-            SQLiteStatement statement = db.compileStatement(UPDATE_STMT);
+            SQLiteStatement statement = database.compileStatement(UPDATE_STMT);
             statement.bindString(1, cartItem.getProductId() + "");
             statement.bindString(2, cartItem.getQuantity() + "");
             statement.bindString(3, cartItem.getId() + "");
@@ -172,7 +172,7 @@ public class EntitiesManager {
         }
 
         public void clear() {
-            db.execSQL(DELETE_ALL);
+            database.execSQL(DELETE_ALL);
         }
     }
 }
