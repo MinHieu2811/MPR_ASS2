@@ -36,14 +36,14 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ProductHolder>
             ImageDownloader imageDownload = new ImageDownloader(image);
             imageDownload.execute(productInCart.getThumbnail());
 
-            TextView totalPrice = itemView.findViewById(R.id.total_price);
-            TextView quantity = itemView.findViewById(R.id.quantity);
+            TextView totalPrice = itemView.findViewById(R.id.totalPrice);
+            TextView quantity = itemView.findViewById(R.id.cartQuantity);
 
-            TextView name = itemView.findViewById(R.id.name2);
-            ImageButton downBtn = itemView.findViewById(R.id.downBtn);
+            TextView name = itemView.findViewById(R.id.secondName);
+            ImageButton downBtn = itemView.findViewById(R.id.downButton);
 
             TextView price = itemView.findViewById(R.id.single_price);
-            ImageButton upBtn = itemView.findViewById(R.id.upBtn);
+            ImageButton upBtn = itemView.findViewById(R.id.upButton);
 
             name.setText(productInCart.getTrimName());
             price.setText(productInCart.getFormattedUnitPrice());

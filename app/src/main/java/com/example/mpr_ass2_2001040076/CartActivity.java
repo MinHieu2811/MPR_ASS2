@@ -31,14 +31,11 @@ public class CartActivity extends AppCompatActivity {
         List<Product> products = entities.onGetProductManager().all();
         List<CartItem> cartItems = entities.onGetCartManager().all();
 
-        TextView footerTotalPriceTextView = findViewById(R.id.footer_price);
+        TextView footerTotalPriceTextView = findViewById(R.id.footerPrice);
 
         rwProducts = findViewById(R.id.s2_rw);
-        // set layout
         rwProducts.setLayoutManager(new LinearLayoutManager(CartActivity.this));
-        // init adapter
         adapter = new CartAdapter(cartItems, products, footerTotalPriceTextView);
-        // bind RecycleView with adapter
         rwProducts.setAdapter(adapter);
 
         ImageButton backBtn = findViewById(R.id.backBtn);

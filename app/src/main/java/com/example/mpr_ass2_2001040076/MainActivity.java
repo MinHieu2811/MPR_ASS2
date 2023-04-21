@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        ImageButton goToCart = findViewById(R.id.s1_go_to_cart);
+        ImageButton goToCart = findViewById(R.id.goToCartBtn);
         goToCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
